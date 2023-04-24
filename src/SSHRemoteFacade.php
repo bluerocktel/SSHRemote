@@ -17,7 +17,7 @@ class SSHRemoteFacade
     public static function getInstance(string $host, string $username, string $private_key_path, int $port = 22)
     {
         if (null === self::$instance) {
-            self::$instance = new SSHRemote($host, $private_key_path, $port);
+            self::$instance = new SSHRemote($host, $username, $private_key_path, $port);
         }
 
         return self::$instance;

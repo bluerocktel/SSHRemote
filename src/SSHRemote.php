@@ -15,10 +15,13 @@ class SSHRemote
     {
         $key = PublicKeyLoader::load(file_get_contents($private_key_path));
         $this->ssh_connection = new SSH2($host, $port);
-        if (!$this->ssh_connection->login($username, $key)) {
+        if (! $this->ssh_connection->login($username, $key)) {
             throw new \Exception('SSH login failed');
         }
-        $this->sftp = new SFTP($this->ssh_connection);
+        $this->sftp = new SFTP($host, $port);
+        if (! $this->sftp->login($username, $key)) {
+            throw new \Exception('SFTP login failed');
+        }
     }
 
     public function run($commands)
@@ -35,6 +38,11 @@ class SSHRemote
         return $output;
     }
 
+    public function fileExists(string $remote_file)
+    {
+        return $this->sftp->file_exists($remote_file);
+    }
+
     public function put(string $local_file, string $remote_file)
     {
         return $this->sftp->put($remote_file, $local_file, SFTP::SOURCE_LOCAL_FILE);
@@ -43,6 +51,11 @@ class SSHRemote
     public function get(string $remote_file, string $local_file)
     {
         return $this->sftp->get($remote_file, $local_file);
+    }
+
+    public function getStream(string $remote_file)
+    {
+        return $this->sftp->get($remote_file);
     }
 }
 
